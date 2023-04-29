@@ -2,9 +2,9 @@ import streamlit as st
 import re
 import pandas as pd
 
-st.title('解析結果')
+st.title('Convert to CSV')
 
-uploaded_file = st.file_uploader('ファイルアップロード', type='txt')
+uploaded_file = st.file_uploader('File upload', type='txt')
 
 if 'stress' not in st.session_state:
     st.session_state['stress'] = []
@@ -12,7 +12,7 @@ if 'stress' not in st.session_state:
 if 'increment' not in st.session_state:
     st.session_state['increment'] = []
 
-if st.button('start'):
+if st.button('Show input result'):
     st.session_state['stress'] = []
     st.session_state['increment'] = []
     text = uploaded_file.readlines()[2:]
@@ -37,7 +37,7 @@ increment_series = pd.Series(st.session_state['increment'])
 df = pd.DataFrame()
 df['Increment'] = increment_series
 df['Von Mises Stress'] = stress_series
-st.subheader('result')
+st.subheader('Input result')
 st.dataframe(df)
 
 
@@ -54,22 +54,22 @@ for i in range(len(st.session_state['stress'])):
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button('add'):
+    if st.button('Add'):
         st.session_state['order'].append(st.session_state['num'])
 
 with col2:
-    if st.button('remove'):
+    if st.button('Remove'):
         st.session_state['order'].remove(st.session_state['num'])
 
 with col3:
-    if st.button('reset'):
+    if st.button('Reset'):
         st.session_state['order'] = []
 
-st.write('order')
+st.write('Output order')
 st.write(st.session_state['order'])
 
 stress_new = [st.session_state['stress'][i] for i in st.session_state['order']]
-st.write('stress_new')
+st.write('Output preview')
 st.write(stress_new)
 
 stress_new_series = pd.Series(stress_new)
