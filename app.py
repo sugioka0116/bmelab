@@ -31,13 +31,15 @@ if st.button('start'):
         st.session_state['stress'].append(xy_1[1])
         st.session_state['stress'].append(xy_2[1])
 
-    stress_series = pd.Series(st.session_state['stress'])
-    increment_series = pd.Series(st.session_state['increment'])
-    df = pd.DataFrame()
-    df['Increment'] = increment_series
-    df['Von Mises Stress'] = stress_series
-    st.subheader('result')
-    st.dataframe(df)
+
+stress_series = pd.Series(st.session_state['stress'])
+increment_series = pd.Series(st.session_state['increment'])
+df = pd.DataFrame()
+df['Increment'] = increment_series
+df['Von Mises Stress'] = stress_series
+st.subheader('result')
+st.dataframe(df)
+
 
 if 'order' not in st.session_state:
     st.session_state['order'] = []
