@@ -6,15 +6,20 @@ st.title('Convert to CSV')
 
 uploaded_file = st.file_uploader('File upload', type='txt')
 
+if 'stress1' not in st.session_state:
+    st.session_state['stress1'] = []
+if 'increment1' not in st.session_state:
+    st.session_state['increment1'] = []
+if 'stress2' not in st.session_state:
+    st.session_state['stress2'] = []
+if 'increment2' not in st.session_state:
+    st.session_state['increment2'] = []
+if 'nodelist' not in st.session_state:
+    st.session_state['nodelist'] = []
 if 'stress' not in st.session_state:
     st.session_state['stress'] = []
 
-if 'increment' not in st.session_state:
-    st.session_state['increment'] = []
-
 if st.button('Show input result'):
-    st.session_state['stress'] = []
-    st.session_state['increment'] = []
     text = uploaded_file.readlines()[2:]
     text_line = []
     for i in range(0, len(text)):
@@ -24,32 +29,51 @@ if st.button('Show input result'):
 
     regex = r'[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'
     for i in range(int(curve_max)):
+        node = re.sub(r'\D', '', text_line[3+9*i])
+        st.session_state['nodelist'].append(node)
         xy_1 = re.findall(regex, text_line[7+9*i])
         xy_2 = re.findall(regex, text_line[8+9*i])
-        st.session_state['increment'].append(xy_1[0])
-        st.session_state['increment'].append(xy_2[0])
-        st.session_state['stress'].append(xy_1[1])
-        st.session_state['stress'].append(xy_2[1])
+        st.session_state['increment1'].append(xy_1[0])
+        st.session_state['increment2'].append(xy_2[0])
+        st.session_state['stress1'].append(xy_1[1])
+        st.session_state['stress2'].append(xy_2[1])
 
+st.session_state['stress']\
+    = st.session_state['stress1'] + st.session_state['stress2']
 
-stress_series = pd.Series(st.session_state['stress'])
-increment_series = pd.Series(st.session_state['increment'])
+node_series = pd.Series(st.session_state['nodelist'])
+stress1_series = pd.Series(st.session_state['stress1'])
+increment1_series = pd.Series(st.session_state['increment1'])
+stress2_series = pd.Series(st.session_state['stress2'])
+increment2_series = pd.Series(st.session_state['increment2'])
 df = pd.DataFrame()
-df['Increment'] = increment_series
-df['Von Mises Stress'] = stress_series
+df['Node'] = node_series
+df['Increment 1'] = increment1_series
+df['Von Mises Stress 1'] = stress1_series
+df['Increment 2'] = increment2_series
+df['Von Mises Stress 2'] = stress2_series
 st.subheader('Input result')
 st.dataframe(df)
 
 
 if 'order' not in st.session_state:
     st.session_state['order'] = []
-
 if 'num' not in st.session_state:
     st.session_state['num'] = 0
 
-for i in range(len(st.session_state['stress'])):
-    if st.button(str(i)):
+for i in range(len(st.session_state['stress1'])):
+    if st.button('Node = ' + str(st.session_state['nodelist'][i])
+                 + ' --- Increment = ' + str(st.session_state['increment1'][i])
+                 + ' --- Stress = ' + str(st.session_state['stress1'][i])
+                 + ' --- (' + str(i) + ')'):
         st.session_state['num'] = i
+
+for i in range(len(st.session_state['stress2'])):
+    if st.button('Node = ' + str(st.session_state['nodelist'][i])
+                 + ' --- Increment = ' + str(st.session_state['increment2'][i])
+                 + ' --- Stress = ' + str(st.session_state['stress2'][i])
+                 + ' --- (' + str(i) + ')'):
+        st.session_state['num'] = i + len(st.session_state['stress1'])
 
 col1, col2, col3 = st.columns(3)
 
@@ -65,10 +89,8 @@ with col3:
     if st.button('Reset'):
         st.session_state['order'] = []
 
-st.write('Output order')
-st.write(st.session_state['order'])
-
-stress_new = [st.session_state['stress'][i] for i in st.session_state['order']]
+stress_new\
+    = [st.session_state['stress'][i] for i in st.session_state['order']]
 st.write('Output preview')
 st.write(stress_new)
 
